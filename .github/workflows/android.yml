@@ -1,14 +1,14 @@
-name: Android CI
+name: Android Build CI
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,35 +17,19 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
-          cache: gradle
+          java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept SDK licenses
-        run: yes | sdkmanager --licenses || true
-
-      - name: Install Android 34 SDK
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
-
-      - name: Setup Gradle
+      - name: Setup Gradle (install Gradle)
         uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '8.2'
+          validate-wrappers: false
 
-      - name: Build Debug (root or Azretr-main)
-        shell: bash
-        run: |
-          set -e
-          if [ -f "./gradlew" ]; then
-            chmod +x ./gradlew
-            ./gradlew :app:assembleDebug --no-daemon
-          elif [ -f "Azretr-main/gradlew" ]; then
-            cd Azretr-main
-            chmod +x ./gradlew
-            ./gradlew :app:assembleDebug --no-daemon
-          else
-            echo "ERROR: gradlew not found in repo root or Azretr-main/"
-            echo "Repo root files:"
-            ls -la
-            exit 1
-          fi
+      - name: Build Debug APK
+        run: gradle :app:assembleDebug --stacktrace --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
