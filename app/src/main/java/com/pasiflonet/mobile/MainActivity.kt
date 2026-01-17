@@ -52,7 +52,7 @@ class MainActivity : BaseActivity() {
         }
 
         super.onCreate(savedInstanceState)
-        try { initStreamingSafely() } catch (e: Exception) {
+//         try { initStreamingSafely() } catch (e: Exception) {
             android.util.Log.e("STREAM", "Init failed", e)
         }
 
@@ -330,4 +330,19 @@ class MainActivity : BaseActivity() {
             t.stop()
         }
     }
+
+    private fun initStreamingSafely() {
+        // לא מפעיל כלום אוטומטית כדי לא לקרוס בלופ.
+        // רק בודק שיש URL שמור, והפעלת ניגון/תמלול תהיה בלחיצה.
+        try {
+            val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            val url = prefs.getString("stream_url", "")?.trim().orEmpty()
+            if (url.isEmpty()) return
+            // כאן אפשר לחבר נגן/תמלול בצורה בטוחה בלחיצה בלבד
+        } catch (_: Exception) {
+            // לא מפילים את האפליקציה
+        }
+    }
+
+
 }
