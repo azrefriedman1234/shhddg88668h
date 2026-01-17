@@ -47,7 +47,15 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        try { initStreamingSafely() } catch (e: Exception) {
+            android.util.Log.e("STREAM", "Init failed", e)
+        }
+
         super.onCreate(savedInstanceState)
+        try { initStreamingSafely() } catch (e: Exception) {
+            android.util.Log.e("STREAM", "Init failed", e)
+        }
+
         CrashLogger.install(application)
         
         // --- Crash Catcher Start ---
